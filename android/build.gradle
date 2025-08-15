@@ -1,50 +1,54 @@
 group 'com.whelksoft.flutter_native_timezone'
 version '1.0-SNAPSHOT'
 
-buildscript {
-    ext.kotlin_version = '1.5.30'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.1'
-    }
-}
-
-rootProject.allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+// IMPORTANT: This file no longer declares its own buildscript classpaths.
+// It uses the root project's AGP/Kotlin versions.
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.android'  // replaces 'kotlin-android'
 
 android {
-    compileSdkVersion 34
     namespace 'com.twbt.flutternativetimezone'
 
+    // AGP 8.x style props
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 21            // AGP 8 requires minSdk >= 21
+        targetSdk 34
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Compile to Java 17 bytecode (safe for Android and plugins)
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // keep kotlin sources in the same place
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
-    defaultConfig {
-        targetSdkVersion 34
-        minSdkVersion 19
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-    lintOptions {
-        disable 'InvalidPackage'
+
+    // Lint block (replaces deprecated lintOptions)
+    lint {
+        disable += ['InvalidPackage']
     }
 }
 
+// Use JDK 17 for Kotlin compilation (even if Gradle runs on JDK 21)
+kotlin {
+    jvmToolchain(17)
+}
+
+// Extra guard to ensure all Kotlin tasks emit 17 bytecode
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+// No explicit Kotlin stdlib dependency; Gradle/KGP handles it.
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    // (empty on purpose)
 }
