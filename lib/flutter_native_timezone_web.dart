@@ -1,12 +1,11 @@
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:js/js.dart';
 
 ///
-/// The plugin class for the web, acts as the plugin inside bits
-/// and connects to the js world.
+/// The plugin class for the web.
 ///
 class FlutterNativeTimezonePlugin {
   static void registerWith(Registrar registrar) {
@@ -24,35 +23,28 @@ class FlutterNativeTimezonePlugin {
       case 'getLocalTimezone':
         return _getLocalTimeZone();
       case 'getAvailableTimezones':
-        return [_getLocalTimeZone()];
+        return <String>[_getLocalTimeZone()];
       default:
         throw PlatformException(
-            code: 'Unimplemented',
-            details:
-                "The flutter_native_timezone plugin for web doesn't implement "
-                "the method '${call.method}'");
+          code: 'Unimplemented',
+          details: "The flutter_native_timezone plugin for web doesn't implement the method '${call.method}'",
+        );
     }
   }
 
-  /// Platform-specific implementation of determining the user's
-  /// local time zone when running on the web.
-  ///
   String _getLocalTimeZone() {
-    return jsDateTimeFormat().resolvedOptions().timeZone;
+    final JSString timezone = _jsDateTimeFormat().resolvedOptions().timeZone;
+    return timezone.toDart;
   }
 }
 
 @JS('Intl.DateTimeFormat')
-external _JSDateTimeFormat jsDateTimeFormat();
+external _JSDateTimeFormat _jsDateTimeFormat();
 
-@JS()
-abstract class _JSDateTimeFormat {
-  @JS()
+extension type _JSDateTimeFormat(JSObject _) implements JSObject {
   external _JSResolvedOptions resolvedOptions();
 }
 
-@JS()
-abstract class _JSResolvedOptions {
-  @JS()
-  external String get timeZone;
+extension type _JSResolvedOptions(JSObject _) implements JSObject {
+  external JSString get timeZone;
 }

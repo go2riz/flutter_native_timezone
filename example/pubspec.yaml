@@ -1,11 +1,11 @@
 name: flutter_native_timezone_example
-description: A new example flutter project.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
+description: Demonstrates how to use the flutter_native_timezone plugin.
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
 
 dependencies:
   flutter:
@@ -16,6 +16,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true

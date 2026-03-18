@@ -1,16 +1,29 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
+void main() {
+  runApp(const MyApp());
 }
 
-class _MyAppState extends State<MyApp> {
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: TimezonePage(),
+    );
+  }
+}
+
+class TimezonePage extends StatefulWidget {
+  const TimezonePage({super.key});
+
+  @override
+  State<TimezonePage> createState() => _TimezonePageState();
+}
+
+class _TimezonePageState extends State<TimezonePage> {
   String _timezone = 'Unknown';
   List<String> _availableTimezones = <String>[];
 
@@ -22,40 +35,59 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _initData() async {
     try {
-      _timezone = await FlutterNativeTimezone.getLocalTimezone();
-    } catch (e) {
-      print('Could not get the local timezone');
-    }
-    try {
-      _availableTimezones = await FlutterNativeTimezone.getAvailableTimezones();
-      _availableTimezones.sort();
-    } catch (e) {
-      print('Could not get available timezones');
-    }
-    if (mounted) {
-      setState(() {});
+      final timezone = await FlutterNativeTimezone.getLocalTimezone();
+      final availableTimezones =
+          await FlutterNativeTimezone.getAvailableTimezones();
+      availableTimezones.sort();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _timezone = timezone;
+        _availableTimezones = availableTimezones;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _timezone = 'Failed to get timezone';
+        _availableTimezones = <String>[];
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Local timezone app'),
-        ),
-        body: Column(
-          children: <Widget>[
-            Text('Local timezone: $_timezone\n'),
-            Text('Available timezones:'),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _availableTimezones.length,
-                itemBuilder: (_, index) => Text(_availableTimezones[index]),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Local timezone app'),
+      ),
+      body: Column(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text('Local timezone: $_timezone'),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Available timezones:'),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _availableTimezones.length,
+              itemBuilder: (_, index) => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Text(_availableTimezones[index]),
               ),
-            )
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
